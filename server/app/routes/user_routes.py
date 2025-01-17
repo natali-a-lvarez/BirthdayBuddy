@@ -4,10 +4,30 @@ from app import db
 
 user_bp = Blueprint('user_bp', __name__)
 
-# Create user
+# # Create user
+# @user_bp.route('/users', methods=['POST'])
+# def create_user():
+#     data = request.get_json()
+#     user = User(
+#         name=data['name'],
+#         email=data['email'],
+#         defaultMessage="Happy Birthday!"  
+#     )
+#     db.session.add(user)
+#     db.session.commit()
+#     return jsonify({"message": "User created"}), 201
+
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
+
+    # Check if user exists by email
+    existing_user = User.query.filter_by(email=data['email']).first()
+
+    if existing_user:
+        return jsonify({"message": "User already exists"}), 200
+
+    # If user doesn't exist, create a new user
     user = User(
         name=data['name'],
         email=data['email'],
@@ -15,6 +35,7 @@ def create_user():
     )
     db.session.add(user)
     db.session.commit()
+
     return jsonify({"message": "User created"}), 201
 
 # Get all users with buddies

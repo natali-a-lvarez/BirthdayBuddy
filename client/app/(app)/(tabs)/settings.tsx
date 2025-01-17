@@ -9,6 +9,7 @@ import { useSession } from "../../../auth/ctx";
 
 export default function TabTwoScreen() {
   const { signOut } = useSession();
+
   return (
     <>
       <Collapsible title="File-based routing">

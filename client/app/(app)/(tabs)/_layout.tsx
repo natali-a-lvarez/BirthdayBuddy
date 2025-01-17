@@ -14,7 +14,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
       }}
     >
       <Tabs.Screen
@@ -24,6 +24,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
+          headerTitle: "Dashboard",
         }}
       />
       <Tabs.Screen
@@ -33,6 +34,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.2.fill" color={color} />
           ),
+          headerTitle: "Buddies",
         }}
       />
       <Tabs.Screen
@@ -42,6 +44,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="wrench.adjustable.fill" color={color} />
           ),
+          headerTitle: "Settings",
         }}
       />
     </Tabs>

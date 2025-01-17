@@ -35,31 +35,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const checkUserExists = async (email: string | undefined) => {
-  const response = await fetch("http://127.0.0.1:5000/users", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to get users");
-  }
-
-  const users = await response.json();
-
-  // Find a user with the given email
-  const existingUser = users.find(
-    (user: any) => user.email.toLowerCase() === email?.toLowerCase()
-  );
-
-  return !!existingUser; // Return true if user exists, false otherwise
-};
-
 export default function SignIn() {
-  const { signIn } = useSession();
-  const { userInfo } = useAuth();
+  const { signIn } = useSession(); // Valid usage
+  const { userInfo } = useAuth(); // Valid usage
   let isSigningIn = false;
 
   const handleSignIn = async () => {
@@ -69,29 +47,7 @@ export default function SignIn() {
     try {
       await signIn();
 
-      // Check if user exists, and if not, create them
-      const userExists = await checkUserExists(userInfo?.email);
-
-      if (userExists) {
-        router.replace("/");
-      } else {
-        const response = await fetch("http://127.0.0.1:5000/users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: userInfo?.name,
-            email: userInfo?.email,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to create user");
-        }
-
-        router.replace("/");
-      }
+      router.replace("/");
     } catch (error) {
       console.error("Sign-In Error:", error);
     } finally {
@@ -99,17 +55,19 @@ export default function SignIn() {
     }
   };
 
+  
+
   return (
     <View style={styles.container}>
       <Image
         style={[styles.logo, styles.shadowProp]}
         source={require("../assets/images/logo.png")}
-      ></Image>
+      />
       <Text style={styles.text}>
         Please{" "}
         <Text onPress={handleSignIn} style={styles.boldText}>
-          Sign in
-        </Text>{" "}
+          Sign in{" "}
+        </Text>
         to continue
       </Text>
     </View>
