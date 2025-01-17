@@ -3,6 +3,7 @@ import React, {
   createContext,
   type PropsWithChildren,
   useState,
+  useEffect,
 } from "react";
 import jwtDecode from "jwt-decode";
 import { useStorageState } from "./useStorageState";
@@ -49,6 +50,20 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoading, session], setSession] = useStorageState("session");
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  useEffect(() => {
+    // Check if there is a stored session when the app loads
+    if (session) {
+      const decodedToken: UserInfo = jwtDecode(session);
+      setUserInfo(decodedToken);
+
+      // Optionally, fetch user info from the Auth0 /userinfo endpoint
+      auth0.auth
+        .userInfo({ token: session })
+        .then((fetchedUserInfo) => setUserInfo(fetchedUserInfo))
+        .catch(() => setUserInfo(null));
+    }
+  }, [session]);
+
   const signIn = async () => {
     try {
       const credentials = await auth0.webAuth.authorize({
@@ -56,7 +71,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         audience: `https://${AUTH0_DOMAIN}/userinfo`,
       });
 
-      setSession(credentials.idToken);
+      setSession(credentials.idToken); // Store the session
 
       // Decode the ID token to extract user information
       const decodedToken: UserInfo = jwtDecode(credentials.idToken);

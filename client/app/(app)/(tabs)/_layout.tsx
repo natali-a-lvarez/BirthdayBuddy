@@ -24,9 +24,11 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
+          tabBarActiveTintColor: "#585ce5",
           headerTitle: "Dashboard",
         }}
       />
+
       <Tabs.Screen
         name="buddies"
         options={{
@@ -35,6 +37,7 @@ export default function TabLayout() {
             <IconSymbol size={28} name="person.2.fill" color={color} />
           ),
           headerTitle: "Buddies",
+          tabBarActiveTintColor: "#585ce5",
         }}
       />
       <Tabs.Screen
@@ -44,6 +47,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="wrench.adjustable.fill" color={color} />
           ),
+          tabBarActiveTintColor: "#585ce5",
           headerTitle: "Settings",
         }}
       />
