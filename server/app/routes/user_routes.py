@@ -11,7 +11,7 @@ def create_user():
     user = User(
         name=data['name'],
         email=data['email'],
-        defaultMessage="Happy Birthday!"  # Default message
+        defaultMessage="Happy Birthday!"  
     )
     db.session.add(user)
     db.session.commit()
@@ -49,3 +49,18 @@ def update_default_message(user_id):
     user.defaultMessage = data.get('defaultMessage', user.defaultMessage)
     db.session.commit()
     return jsonify({"message": "User default message updated"})
+
+
+# Delete user by ID
+@user_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    # Optionally, delete all associated buddies
+    for buddy in user.buddies:
+        db.session.delete(buddy)
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": f"User with ID {user_id} and their associated buddies have been deleted."})
