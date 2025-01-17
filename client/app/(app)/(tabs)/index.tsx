@@ -10,6 +10,7 @@ export default function HomeScreen() {
     <View>
       <Text>Welcome {userInfo?.name}!</Text>
       <Button title="View Buddies" onPress={() => router.push("/buddies")} />
+      <Button title="Add Buddy" onPress={() => router.push("/add-buddy")} />
     </View>
   );
 }

@@ -34,14 +34,12 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      {/* Wrap the entire layout with SessionProvider */}
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Slot
           screenOptions={{
-            headerShown: false, // Disable the header for all screens
+            headerShown: false,
           }}
         />
-        {/* Replaces Stack as it manages routing dynamically */}
         <StatusBar style="auto" />
       </ThemeProvider>
     </SessionProvider>
