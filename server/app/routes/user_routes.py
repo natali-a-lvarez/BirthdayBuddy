@@ -4,34 +4,21 @@ from app import db
 
 user_bp = Blueprint('user_bp', __name__)
 
-# # Create user
-# @user_bp.route('/users', methods=['POST'])
-# def create_user():
-#     data = request.get_json()
-#     user = User(
-#         name=data['name'],
-#         email=data['email'],
-#         defaultMessage="Happy Birthday!"  
-#     )
-#     db.session.add(user)
-#     db.session.commit()
-#     return jsonify({"message": "User created"}), 201
-
+# Create a new user
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
 
     # Check if user exists by email
     existing_user = User.query.filter_by(email=data['email']).first()
-
     if existing_user:
         return jsonify({"message": "User already exists"}), 200
 
-    # If user doesn't exist, create a new user
+    # Create a new user
     user = User(
         name=data['name'],
         email=data['email'],
-        defaultMessage="Happy Birthday!"  
+        defaultMessage="Happy Birthday!"
     )
     db.session.add(user)
     db.session.commit()
@@ -50,10 +37,13 @@ def get_all_users():
         "buddies": [{"buddyId": buddy.buddyId, "name": buddy.name} for buddy in user.buddies]
     } for user in users])
 
-# Get user by ID with buddies
-@user_bp.route('/users/<int:user_id>', methods=['GET'])
-def get_user_by_id(user_id):
-    user = User.query.get_or_404(user_id)
+# Get user by email with buddies
+@user_bp.route('/users/<string:user_email>', methods=['GET'])
+def get_user_by_email(user_email):
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
     return jsonify({
         "userId": user.userId,
         "name": user.name,
@@ -62,13 +52,19 @@ def get_user_by_id(user_id):
         "buddies": [{"buddyId": buddy.buddyId, "name": buddy.name} for buddy in user.buddies]
     })
 
-# Update user's default message
-@user_bp.route('/users/<int:user_id>', methods=['PUT'])
-def update_default_message(user_id):
+# Update user's default message by email
+@user_bp.route('/users/<string:user_email>', methods=['PUT'])
+def update_default_message_by_email(user_email):
     data = request.get_json()
-    user = User.query.get_or_404(user_id)
+    user = User.query.filter_by(email=user_email).first()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Update default message
     user.defaultMessage = data.get('defaultMessage', user.defaultMessage)
     db.session.commit()
+
     return jsonify({"message": "User default message updated"})
 
 

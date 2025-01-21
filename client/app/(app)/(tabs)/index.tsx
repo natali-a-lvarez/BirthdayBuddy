@@ -1,13 +1,13 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth } from "../../../auth/ctx";
 import { useRouter } from "expo-router";
-import { IconSymbol } from "@/components/ui/IconSymbol"; // Ensure you're importing IconSymbol
-import { useEffect, useState } from "react"; // Import useState and useEffect for fetching data
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useEffect, useState } from "react";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20, // Apply consistent padding here
+    padding: 20,
   },
   headingText: {
     fontSize: 24,
@@ -16,19 +16,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   btn: {
-    paddingVertical: 10, // Vertical padding
-    paddingHorizontal: 20, // Horizontal padding to give space for text and icon
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    flexDirection: "row", // Align icon and text in a row
-    alignItems: "center", // Vertically center the items
-    justifyContent: "center", // Horizontally center the items
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginVertical: 10,
   },
   btnText: {
     color: "#151718",
     fontSize: 16,
     fontWeight: "bold",
-    marginLeft: 10, // Space between the icon and the text
+    marginLeft: 10,
   },
   btnTextLight: {
     color: "#fff",
@@ -57,11 +57,23 @@ const styles = StyleSheet.create({
   },
   upcomingItem: {
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    backgroundColor: "#f9f9f9",
+  },
+  nameText: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  ageText: {
+    fontSize: 16,
+    color: "#999",
   },
 });
 
-// Define Buddy type
 interface Buddy {
   buddyId: string;
   name: string;
@@ -73,14 +85,11 @@ interface Buddy {
 export default function HomeScreen() {
   const { userInfo, session } = useAuth();
   const router = useRouter();
-  const [buddies, setBuddies] = useState<Buddy[]>([]); // Type state with Buddy[] array
+  const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch buddies only if session and userInfo are available
   useEffect(() => {
-    if (!session || !userInfo) {
-      return; // Skip fetching if no session or user info
-    }
+    if (!session || !userInfo) return;
 
     const fetchUpcomingBuddies = async () => {
       setLoading(true);
@@ -90,14 +99,30 @@ export default function HomeScreen() {
         );
         const data = await response.json();
 
-        // Sort buddies by next upcoming birthday
-        const sortedBuddies = data
+        const currentDate = new Date();
+        const upcomingBuddies = data
           .map((buddy: Buddy) => ({
             ...buddy,
-            birthday: new Date(buddy.birthday), // Ensure it's a Date object
+            birthday: new Date(buddy.birthday),
           }))
+          .filter((buddy: Buddy) => {
+            const nextBirthday = new Date(
+              currentDate.getFullYear(),
+              buddy.birthday.getMonth(),
+              buddy.birthday.getDate()
+            );
+
+            if (nextBirthday < currentDate) {
+              nextBirthday.setFullYear(currentDate.getFullYear() + 1);
+            }
+
+            const diffDays =
+              (nextBirthday.getTime() - currentDate.getTime()) /
+              (1000 * 60 * 60 * 24);
+
+            return diffDays <= 30;
+          })
           .sort((a: Buddy, b: Buddy) => {
-            const currentDate = new Date();
             const nextA = new Date(
               currentDate.getFullYear(),
               a.birthday.getMonth(),
@@ -109,16 +134,15 @@ export default function HomeScreen() {
               b.birthday.getDate()
             );
 
-            // If birthday is already passed this year, set to next year
             if (nextA < currentDate)
               nextA.setFullYear(currentDate.getFullYear() + 1);
             if (nextB < currentDate)
               nextB.setFullYear(currentDate.getFullYear() + 1);
 
-            return nextA.getTime() - nextB.getTime(); // Compare by timestamp
+            return nextA.getTime() - nextB.getTime();
           });
 
-        setBuddies(sortedBuddies); // Update state with sorted buddies
+        setBuddies(upcomingBuddies);
       } catch (error) {
         console.error("Error fetching buddies:", error);
       } finally {
@@ -127,7 +151,7 @@ export default function HomeScreen() {
     };
 
     fetchUpcomingBuddies();
-  }, [session, userInfo]); // Run when session or userInfo changes
+  }, [session, userInfo]);
 
   if (!session || !userInfo) {
     return (
@@ -167,21 +191,54 @@ export default function HomeScreen() {
         <Text style={[styles.btnText, styles.btnTextLight]}>Add Buddy</Text>
       </TouchableOpacity>
 
-      {/* Display upcoming birthdays */}
-      {buddies.length > 0 && !loading && (
+      {loading && <Text>Loading upcoming birthdays...</Text>}
+
+      {!loading && buddies.length > 0 && (
         <>
           <Text style={styles.upcomingText}>Upcoming Birthdays:</Text>
           <View style={styles.upcomingList}>
-            {buddies.map((buddy) => (
-              <Text key={buddy.buddyId} style={styles.upcomingItem}>
-                {buddy.name} - {buddy.birthday.toLocaleDateString()}
-              </Text>
-            ))}
+            {buddies.map((buddy) => {
+              const currentYear = new Date().getFullYear();
+              const age =
+                currentYear -
+                buddy.birthday.getFullYear() -
+                (new Date(
+                  currentYear,
+                  buddy.birthday.getMonth(),
+                  buddy.birthday.getDate()
+                ) < new Date()
+                  ? 1
+                  : 0);
+
+              // Custom formatter for the birthday
+              const formattedBirthday = buddy.birthday.toLocaleDateString(
+                "en-US",
+                {
+                  month: "long",
+                  day: "numeric",
+                }
+              );
+
+              return (
+                <TouchableOpacity
+                  key={buddy.buddyId}
+                  style={styles.upcomingItem}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/buddy-details",
+                      params: { buddyId: buddy.buddyId },
+                    })
+                  }
+                >
+                  <Text style={styles.nameText}>{buddy.name}</Text>
+                  <Text style={styles.ageText}>{formattedBirthday}</Text>
+                  <Text style={styles.ageText}>Age: {age}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </>
       )}
-
-      {loading && <Text>Loading upcoming birthdays...</Text>}
     </View>
   );
 }
