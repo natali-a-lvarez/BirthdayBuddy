@@ -1,85 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import DatePicker from "react-native-date-picker"; // Import the date picker
+import DatePicker from "react-native-date-picker";
 import { useNavigation } from "expo-router";
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  input: {
-    height: 50,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    justifyContent: "center", // Align text vertically
-  },
-  btnContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
-  },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
-    backgroundColor: "#ffbae4",
-  },
-  btnText: {
-    color: "#151718",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  // New styles for the delete button
-  deleteBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
-    backgroundColor: "#f0f0f0", // Light grey background
-    borderWidth: 1,
-    borderColor: "#ff4d4d", // Red border
-  },
-  deleteBtnText: {
-    color: "#ff4d4d", // Red text
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
+import styles from "../styles/BuddyDetailsStyles";
 
 export default function BuddyDetails() {
   const { buddyId } = useLocalSearchParams(); // Get buddyId from the URL params
@@ -148,7 +72,7 @@ export default function BuddyDetails() {
       if (!response.ok) throw new Error("Failed to update buddy");
 
       Alert.alert("Success", "Buddy updated successfully!");
-      router.push("/buddies"); // Navigate back to the buddies list
+      router.back();
     } catch (error) {
       console.error("Error saving buddy details:", error);
       Alert.alert("Error", "Failed to save buddy details.");
@@ -156,7 +80,7 @@ export default function BuddyDetails() {
   };
 
   const handleCancel = () => {
-    router.push("/buddies");
+    router.back();
   };
 
   // Delete the buddy with confirmation
@@ -181,7 +105,7 @@ export default function BuddyDetails() {
               );
               if (!response.ok) throw new Error("Failed to delete buddy");
               Alert.alert("Success", "Buddy deleted successfully!");
-              router.push("/buddies"); // Navigate back to the buddies list
+              router.back();
             } catch (error) {
               console.error("Error deleting buddy:", error);
               Alert.alert("Error", "Failed to delete buddy.");

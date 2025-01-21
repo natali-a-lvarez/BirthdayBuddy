@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { useAuth } from "../../auth/ctx";
 import { useRouter } from "expo-router";
 import { useNavigation } from "expo-router";
+import styles from "../styles/AddBuddyStyles";
 
 export default function AddBuddy() {
   const { userInfo } = useAuth(); // Retrieve user info from the session
@@ -74,7 +67,7 @@ export default function AddBuddy() {
       }
 
       Alert.alert("Success", "Buddy added successfully!");
-      router.push("/buddies"); // Navigate back to the buddies list
+      router.back();
     } catch (error) {
       console.error("Error adding buddy:", error);
       Alert.alert(
@@ -100,10 +93,7 @@ export default function AddBuddy() {
         style={styles.input}
         onPress={() => setDatePickerOpen(true)}
       >
-        <Text>
-          {formData.birthday.toISOString().split("T")[0]}{" "}
-          {/* Display the selected date */}
-        </Text>
+        <Text>{formData.birthday.toISOString().split("T")[0]} </Text>
       </TouchableOpacity>
       <DatePicker
         modal
@@ -143,40 +133,3 @@ export default function AddBuddy() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#333",
-  },
-  input: {
-    height: 50,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    justifyContent: "center", // Align text vertically
-  },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 10,
-    backgroundColor: "#ffbae4",
-  },
-  btnText: {
-    color: "#151718",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
