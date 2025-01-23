@@ -46,7 +46,7 @@ export default function BuddiesScreen() {
     if (userInfo?.email) {
       fetchBuddies();
     }
-  }, [userInfo]);
+  }, [userInfo, buddies]);
 
   // Filter by search query
   const filteredBuddies = buddies.filter((buddy) =>

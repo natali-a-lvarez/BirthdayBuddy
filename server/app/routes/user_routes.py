@@ -61,7 +61,6 @@ def update_default_message_by_email(user_email):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Update default message
     user.defaultMessage = data.get('defaultMessage', user.defaultMessage)
     db.session.commit()
 
@@ -73,7 +72,7 @@ def update_default_message_by_email(user_email):
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
-    # Optionally, delete all associated buddies
+    # delete all associated buddies
     for buddy in user.buddies:
         db.session.delete(buddy)
 

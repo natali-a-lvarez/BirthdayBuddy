@@ -24,14 +24,13 @@ def create_buddy(user_email):
     buddy = Buddy(
         userId=user.userId,
         name=data['name'],
-        birthday=birthday,  # Use the converted date object
+        birthday=birthday,  
         nickname=data.get('nickname'),
         customMessage=data.get('customMessage')
     )
     db.session.add(buddy)
     db.session.commit()
 
-    # Return a valid response tuple
     return jsonify({"message": "Buddy created"}), 201
 
 # Get all buddies for a user by user email
@@ -74,7 +73,6 @@ def update_buddy(buddy_id):
         buddy.nickname = data.get("nickname", buddy.nickname)
         buddy.customMessage = data.get("customMessage", buddy.customMessage)
         
-        # Ensure the 'birthday' is a date object
         birthday_str = data.get("birthday")
         if birthday_str:
             buddy.birthday = datetime.strptime(birthday_str, "%Y-%m-%d").date()

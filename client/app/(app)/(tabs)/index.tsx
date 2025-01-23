@@ -21,14 +21,12 @@ export default function HomeScreen() {
   const { userInfo, session } = useAuth();
   const router = useRouter();
   const [buddies, setBuddies] = useState<Buddy[]>([]);
-  const [loading, setLoading] = useState(false);
 
   // Get all buddies for logged in user
   useEffect(() => {
     if (!session || !userInfo) return;
 
     const fetchUpcomingBuddies = async () => {
-      setLoading(true);
       try {
         const response = await fetch(
           `http://127.0.0.1:5000/users/${userInfo.email}/buddies`
@@ -83,13 +81,11 @@ export default function HomeScreen() {
         setBuddies(upcomingBuddies);
       } catch (error) {
         console.error("Error fetching buddies:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchUpcomingBuddies();
-  }, [session, userInfo]);
+  }, [session, userInfo, buddies]);
 
   // If user is not logged in make them log in
   if (!session || !userInfo) {
@@ -140,9 +136,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {/* Upcoming buddies */}
-      {loading && <Text>Loading upcoming birthdays...</Text>}
-
-      {!loading && buddies.length > 0 && (
+      {buddies.length > 0 && (
         <>
           <Text style={styles.upcomingText}>Upcoming Birthdays:</Text>
           <View style={styles.upcomingList}>
