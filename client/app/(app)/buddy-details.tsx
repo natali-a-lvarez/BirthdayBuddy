@@ -3,14 +3,24 @@ import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import DatePicker from "react-native-date-picker";
 import { useNavigation } from "expo-router";
-import styles from "../styles/BuddyDetailsStyles";
+
+// Stylesheets
+import globalStyles from "../styles/GlobalStyles";
 
 export default function BuddyDetails() {
-  const { buddyId } = useLocalSearchParams(); // Get buddyId from the URL params
+  const { buddyId } = useLocalSearchParams();
   const router = useRouter();
-
   const navigation = useNavigation();
+  const [buddy, setBuddy] = useState({
+    name: "",
+    birthday: new Date(),
+    nickname: "",
+    customMessage: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
+  // Customize header for this page
   useEffect(() => {
     navigation.setOptions({
       headerTitle: "Buddy details",
@@ -19,16 +29,7 @@ export default function BuddyDetails() {
     });
   }, [navigation]);
 
-  const [buddy, setBuddy] = useState({
-    name: "",
-    birthday: new Date(), // Use Date object for the date picker
-    nickname: "",
-    customMessage: "",
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [isDatePickerOpen, setDatePickerOpen] = useState(false); // Control date picker visibility
-
+  // Get buddy details
   useEffect(() => {
     const fetchBuddyDetails = async () => {
       try {
@@ -37,12 +38,11 @@ export default function BuddyDetails() {
         );
         const data = await response.json();
 
-        // Ensure birthday is always a Date object
         const birthday = new Date(data.birthday);
         setBuddy((prev) => ({
           ...prev,
           ...data,
-          birthday: isNaN(birthday.getTime()) ? new Date() : birthday, // Validate the date
+          birthday: isNaN(birthday.getTime()) ? new Date() : birthday,
         }));
       } catch (error) {
         console.error("Error fetching buddy details:", error);
@@ -54,10 +54,12 @@ export default function BuddyDetails() {
     }
   }, [buddyId]);
 
+  // Update changed values
   const handleChange = (field: string, value: string | Date) => {
     setBuddy((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Save
   const handleSave = async () => {
     try {
       const response = await fetch(`http://127.0.0.1:5000/buddies/${buddyId}`, {
@@ -65,7 +67,7 @@ export default function BuddyDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...buddy,
-          birthday: buddy.birthday.toISOString().split("T")[0], // Ensure birthday is a valid date string
+          birthday: buddy.birthday.toISOString().split("T")[0],
         }),
       });
 
@@ -79,11 +81,7 @@ export default function BuddyDetails() {
     }
   };
 
-  const handleCancel = () => {
-    router.back();
-  };
-
-  // Delete the buddy with confirmation
+  // Delete buddy with confirmation
   const handleDelete = () => {
     Alert.alert(
       "Delete Buddy",
@@ -118,20 +116,20 @@ export default function BuddyDetails() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.container}>
       {/* Buddy Name Input */}
-      <Text style={styles.label}>Name</Text>
+      <Text style={globalStyles.label}>Name</Text>
       <TextInput
-        style={styles.input}
+        style={globalStyles.input}
         value={buddy.name}
         onChangeText={(text) => handleChange("name", text)}
         placeholder="Name"
       />
 
       {/* Birthday Picker */}
-      <Text style={styles.label}>Birthday</Text>
+      <Text style={globalStyles.label}>Birthday</Text>
       <TouchableOpacity
-        style={styles.input}
+        style={globalStyles.input}
         onPress={() => setDatePickerOpen(true)}
       >
         <Text>{buddy.birthday.toISOString().split("T")[0]} </Text>
@@ -148,38 +146,41 @@ export default function BuddyDetails() {
         onCancel={() => setDatePickerOpen(false)}
       />
 
-      <Text style={styles.label}>Nickname</Text>
+      {/* Nickname */}
+      <Text style={globalStyles.label}>Nickname</Text>
       <TextInput
-        style={styles.input}
+        style={globalStyles.input}
         value={buddy.nickname}
         onChangeText={(text) => handleChange("nickname", text)}
         placeholder="Nickname"
       />
 
-      <Text style={styles.label}>Custom Message</Text>
+      {/* Custom message */}
+      <Text style={globalStyles.label}>Custom Message</Text>
       <TextInput
-        style={styles.input}
+        style={globalStyles.input}
         value={buddy.customMessage}
         onChangeText={(text) => handleChange("customMessage", text)}
         placeholder="Custom Message"
       />
 
+      {/* Save Btn */}
       <TouchableOpacity
-        style={styles.btn}
+        style={globalStyles.btn}
         onPress={handleSave}
         disabled={loading}
       >
-        <Text style={styles.btnText}>
+        <Text style={globalStyles.btnText}>
           {loading ? "Saving..." : "Save Buddy"}
         </Text>
       </TouchableOpacity>
 
-      {/* Delete Button */}
+      {/* Delete Btn */}
       <TouchableOpacity
-        style={styles.deleteBtn} // Updated button style
+        style={[globalStyles.btn, globalStyles.redBtn]}
         onPress={handleDelete}
       >
-        <Text style={styles.deleteBtnText}>Delete Buddy</Text>
+        <Text style={globalStyles.btnText}>Delete Buddy</Text>
       </TouchableOpacity>
     </View>
   );

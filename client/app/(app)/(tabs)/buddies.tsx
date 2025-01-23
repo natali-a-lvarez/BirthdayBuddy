@@ -9,8 +9,12 @@ import {
 import { useAuth } from "../../../auth/ctx";
 import { useRouter } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import styles from "@/app/styles/BuddiesScreenStyles";
+import { formatBirthday } from "../../utils/dateUtils";
 
-// Define the Buddy type
+// Stylesheets
+import globalStyles from "../../styles/GlobalStyles";
+
 type Buddy = {
   buddyId: number;
   name: string;
@@ -18,15 +22,14 @@ type Buddy = {
   nickname?: string;
   customMessage?: string;
 };
-import styles from "@/app/styles/BuddiesScreenStyles";
 
 export default function BuddiesScreen() {
-  const { userInfo } = useAuth();
+  const { userInfo, session } = useAuth();
   const router = useRouter();
-
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Get all buddies for logged in user
   useEffect(() => {
     const fetchBuddies = async () => {
       try {
@@ -45,10 +48,12 @@ export default function BuddiesScreen() {
     }
   }, [userInfo]);
 
+  // Filter by search query
   const filteredBuddies = buddies.filter((buddy) =>
     buddy.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Define how buddies will be grouped
   const groupedBuddies = filteredBuddies.reduce<Record<string, Buddy[]>>(
     (acc, buddy) => {
       const firstLetter = buddy.name[0].toUpperCase();
@@ -61,6 +66,7 @@ export default function BuddiesScreen() {
     {}
   );
 
+  // Define sections
   const sections = Object.keys(groupedBuddies)
     .sort()
     .map((letter) => ({
@@ -68,25 +74,37 @@ export default function BuddiesScreen() {
       data: groupedBuddies[letter],
     }));
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = {
-      month: "short",
-      day: "numeric",
-    };
-    return date.toLocaleDateString("en-US", options); // Formats as "Jan 15"
-  };
+  // If user is not logged in make them log in
+  if (!session || !userInfo) {
+    return (
+      <View style={globalStyles.container}>
+        <Text style={globalStyles.errorText}>
+          Session has expired. Please log in again.
+        </Text>
+        <TouchableOpacity
+          style={[globalStyles.btn, globalStyles.btnLight]}
+          onPress={() => router.push("/sign-in")}
+        >
+          <Text style={[globalStyles.btnText]}>Go to Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
+    <View style={[globalStyles.container, globalStyles.bckgLight]}>
+      {/* Add buddy btn */}
       <TouchableOpacity
-        style={[styles.btn, styles.btnDark]}
+        style={[globalStyles.btn, globalStyles.btnDark]}
         onPress={() => router.push("/add-buddy")}
       >
-        <IconSymbol size={20} name="plus.circle.fill" color="#fff" />
-        <Text style={styles.btnText}>Add Buddy</Text>
+        <View style={globalStyles.btnContentRow}>
+          <IconSymbol size={20} name="plus.circle.fill" color="#fff" />
+          <Text style={globalStyles.btnTextLight}>Add Buddy</Text>
+        </View>
       </TouchableOpacity>
 
+      {/* Search */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search Buddies"
@@ -94,6 +112,7 @@ export default function BuddiesScreen() {
         onChangeText={(text) => setSearchQuery(text)}
       />
 
+      {/* Buddy list */}
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.buddyId.toString()}
@@ -112,7 +131,7 @@ export default function BuddiesScreen() {
           >
             <Text style={styles.buddyName}>{item.name}</Text>
             <Text style={styles.buddyBirthday}>
-              {formatDate(item.birthday)}
+              {formatBirthday(new Date(item.birthday))}
             </Text>
           </TouchableOpacity>
         )}

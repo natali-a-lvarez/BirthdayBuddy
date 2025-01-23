@@ -3,7 +3,11 @@ import { useAuth } from "../../../auth/ctx";
 import { useRouter } from "expo-router";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useEffect, useState } from "react";
+import { formatBirthday, calculateAge } from "../../utils/dateUtils";
+
+// Stylesheets
 import styles from "@/app/styles/DashboardStyles";
+import globalStyles from "@/app/styles/GlobalStyles";
 
 interface Buddy {
   buddyId: string;
@@ -19,6 +23,7 @@ export default function HomeScreen() {
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Get all buddies for logged in user
   useEffect(() => {
     if (!session || !userInfo) return;
 
@@ -31,6 +36,8 @@ export default function HomeScreen() {
         const data = await response.json();
 
         const currentDate = new Date();
+
+        // Calculate what buddies have birthdays in the next 30 days
         const upcomingBuddies = data
           .map((buddy: Buddy) => ({
             ...buddy,
@@ -84,44 +91,55 @@ export default function HomeScreen() {
     fetchUpcomingBuddies();
   }, [session, userInfo]);
 
+  // If user is not logged in make them log in
   if (!session || !userInfo) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>
+      <View style={globalStyles.container}>
+        <Text style={globalStyles.errorText}>
           Session has expired. Please log in again.
         </Text>
         <TouchableOpacity
-          style={[styles.btn, styles.btnLight]}
+          style={[globalStyles.btn, globalStyles.btnLight]}
           onPress={() => router.push("/sign-in")}
         >
-          <Text style={[styles.btnText]}>Go to Login</Text>
+          <Text style={[globalStyles.btnText]}>Go to Login</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.container}>
+      {/* Welcome message */}
       <Text style={styles.headingText}>
         Welcome, {userInfo?.name?.split(" ")[0]}!
       </Text>
 
+      {/* View buddies btn */}
       <TouchableOpacity
-        style={[styles.btn, styles.btnLight]}
+        style={[globalStyles.btn, globalStyles.btnLight]}
         onPress={() => router.push("/buddies")}
       >
-        <IconSymbol size={20} name="book.fill" color="#151718" />
-        <Text style={styles.btnText}>View Buddies</Text>
+        <View style={globalStyles.btnContentRow}>
+          <IconSymbol size={20} name="book.fill" color="#151718" />
+          <Text style={globalStyles.btnText}>View Buddies</Text>
+        </View>
       </TouchableOpacity>
 
+      {/* Add Buddy btn */}
       <TouchableOpacity
-        style={[styles.btn, styles.btnDark]}
+        style={[globalStyles.btn, globalStyles.btnDark]}
         onPress={() => router.push("/add-buddy")}
       >
-        <IconSymbol size={20} name="plus.circle.fill" color="#fff" />
-        <Text style={[styles.btnText, styles.btnTextLight]}>Add Buddy</Text>
+        <View style={globalStyles.btnContentRow}>
+          <IconSymbol size={20} name="plus.circle.fill" color="#fff" />
+          <Text style={[globalStyles.btnText, globalStyles.btnTextLight]}>
+            Add Buddy
+          </Text>
+        </View>
       </TouchableOpacity>
 
+      {/* Upcoming buddies */}
       {loading && <Text>Loading upcoming birthdays...</Text>}
 
       {!loading && buddies.length > 0 && (
@@ -129,26 +147,8 @@ export default function HomeScreen() {
           <Text style={styles.upcomingText}>Upcoming Birthdays:</Text>
           <View style={styles.upcomingList}>
             {buddies.map((buddy) => {
-              const currentYear = new Date().getFullYear();
-              const age =
-                currentYear -
-                buddy.birthday.getFullYear() -
-                (new Date(
-                  currentYear,
-                  buddy.birthday.getMonth(),
-                  buddy.birthday.getDate()
-                ) < new Date()
-                  ? 1
-                  : 0);
-
-              // Custom formatter for birthday
-              const formattedBirthday = buddy.birthday.toLocaleDateString(
-                "en-US",
-                {
-                  month: "long",
-                  day: "numeric",
-                }
-              );
+              const formattedBirthday = formatBirthday(buddy.birthday);
+              const age = calculateAge(buddy.birthday);
 
               return (
                 <TouchableOpacity

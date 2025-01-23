@@ -10,14 +10,12 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { SessionProvider } from "../auth/ctx"; // Import your SessionProvider
+import { SessionProvider } from "../auth/ctx";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -34,14 +32,12 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Slot
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <Slot
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+      <StatusBar style="auto" />
     </SessionProvider>
   );
 }

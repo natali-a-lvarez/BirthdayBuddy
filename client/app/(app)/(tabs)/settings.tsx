@@ -8,15 +8,21 @@ import {
   Alert,
 } from "react-native";
 import { useSession } from "../../../auth/ctx";
-import styles from "../../styles/SettingsStyles";
+import { useAuth } from "../../../auth/ctx";
+import { useRouter } from "expo-router";
+
+// Stylesheets
+import globalStyles from "@/app/styles/GlobalStyles";
 
 export default function SettingsScreen() {
   const { userInfo, signOut } = useSession();
+  const router = useRouter();
+  const { session } = useAuth();
   const [customMessage, setCustomMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Get current custom message
   useEffect(() => {
-    // Fetch the current custom message
     const fetchCustomMessage = async () => {
       try {
         setLoading(true);
@@ -68,12 +74,29 @@ export default function SettingsScreen() {
     }
   };
 
+  // If user is not logged in make them log in
+  if (!session || !userInfo) {
+    return (
+      <View style={globalStyles.container}>
+        <Text style={globalStyles.errorText}>
+          Session has expired. Please log in again.
+        </Text>
+        <TouchableOpacity
+          style={[globalStyles.btn, globalStyles.btnLight]}
+          onPress={() => router.push("/sign-in")}
+        >
+          <Text style={[globalStyles.btnText]}>Go to Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={[globalStyles.container, globalStyles.bckgLight]}>
       {/* Custom Message */}
-      <Text style={styles.label}>Update Custom Message:</Text>
+      <Text style={globalStyles.label}>Update Custom Message:</Text>
       <TextInput
-        style={styles.input}
+        style={globalStyles.input}
         value={customMessage}
         onChangeText={setCustomMessage}
         placeholder="Enter your custom message"
@@ -81,23 +104,23 @@ export default function SettingsScreen() {
       />
 
       <TouchableOpacity
-        style={[styles.button, styles.saveButton]}
+        style={[globalStyles.btn, globalStyles.btnLight]}
         onPress={handleSaveMessage}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="#ffffff" />
         ) : (
-          <Text style={styles.buttonText}>Save Custom Message</Text>
+          <Text style={globalStyles.btnText}>Save Custom Message</Text>
         )}
       </TouchableOpacity>
 
       {/* Logout Button */}
       <TouchableOpacity
-        style={[styles.button, styles.logoutButton]}
+        style={[globalStyles.btn, globalStyles.redBtn]}
         onPress={signOut}
       >
-        <Text style={styles.buttonText}>Sign Out</Text>
+        <Text style={globalStyles.btnText}>Sign Out</Text>
       </TouchableOpacity>
     </View>
   );
