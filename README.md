@@ -52,7 +52,7 @@ python run.py
 ```bash
 cd frontend
 npm install
-expo start
+npm run ios
 ```
 
 ### Built with
